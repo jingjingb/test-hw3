@@ -158,6 +158,7 @@ class TilePuzzle(object):
                 new_g = curr[1] + 1
                 new_h = puzzle.manhattan(puzzle.sol)
                 if tuple(tuple(x) for x in puzzle.board) not in closed_set or new_g < closed_set[tuple(tuple(x) for x in puzzle.board)]:
+                    closed_set[tuple(tuple(x) for x in puzzle.board)] = new_g
                     open_set.put((new_g + new_h, new_g, curr[2] + [move], puzzle))
 
     def manhattan(self, t1):
