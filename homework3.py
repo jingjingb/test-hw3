@@ -146,11 +146,6 @@ class TilePuzzle(object):
 
         while open_set:
             curr = open_set.get()
-            if tuple(tuple(x) for x in curr[3].board) in closed_set:
-                continue
-            else:
-                closed_set[tuple(tuple(x) for x in curr[3].board)] = curr[1]
-
             if curr[3].is_solved():
                 return curr[2]
 
