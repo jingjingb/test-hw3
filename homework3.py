@@ -172,109 +172,8 @@ class TilePuzzle(object):
         return total
 
 
-           
-
-"""
-class TilePuzzle(object):
-    # Required
-    def __init__(self, board):
-        self.board = [[board[row][col] for col in range(len(board[0]))] for row in range(len(board))]
-        self._TilePuzzle__board = board
-        self.find_empty = False
-        for row in range(len(board)):
-            if self.find_empty:
-                break
-            for col in range(len(board[0])):
-                if board[row][col] == 0:
-                    self.empty_row = row
-                    self.empty_col = col
-                    self.find_empty = True
-                    break
-
-    def get_board(self):
-        return self.board
-
-    def perform_move(self, direction):
-        try:
-            delta = {"up": [-1, 0],"down": [1,0],"left":[0,-1],"right":[0,1]}[direction]
-            delta_row, delta_col = delta[0], delta[1]
-            target_row = self.empty_row + delta_row
-            target_col = self.empty_col + delta_col
-        except:
-            return False
-        if target_row >=0 and target_row <len(self.board) and target_col>=0 and target_col<len(self.board[0]):
-            self.board[self.empty_row][self.empty_col] = self.board[target_row][target_col]
-            self.board[target_row][target_col] = 0
-            self.empty_col = target_col
-            self.empty_row = target_row
-            return True
-        else:
-            return False
-
-    def scramble(self, num_moves):
-        for _ in range(num_moves):
-            self.perform_move(random.choice(["up", "down", "left", "right"]))
-
-    def is_solved(self):
-        return self.board == create_tile_puzzle(len(self.board), len(self.board[0])).get_board()
-
-    def copy(self):
-        new_board = copy.deepcopy(self.__board)
-        return TilePuzzle(new_board)
-
-    def successors(self):
-        for move in ['up','down','left','right']:
-            new_p = self.copy()
-            if new_p.perform_move(move):
-                yield move,new_p
-
-    # Required
-    def find_solutions_iddfs(self):
-        is_found_solution = False
-        limit = 0
-        while not is_found_solution:
-            for move in self.iddfs_helper(limit, []):
-                yield move
-                is_found_solution = True
-            limit += 1
-
-    def iddfs_helper(self, limit, route):
-        if self.is_solved():
-            yield route
-        elif len(route) < limit:
-            for move, puzzle in self.successors():
-                for sol in puzzle.iddfs_helper(limit, route + [move]):
-                    yield sol
 
 
-    def heuristic_md(self):
-      # manhattan distance
-      solved_row = lambda row, col: int((self.board[row][col] - 1)/len(self.board)) \
-                    if self.board[row][col] != 0 else len(self.board) - 1
-      solved_col = lambda row, col: self.board[row][col] - solved_row(row, col) * len(self.board[0]) - 1 \
-                    if self.board[row][col] != 0 else len(self.board[0]) - 1
-      return sum([ abs(solved_col(row, col) - col) + abs(solved_row(row, col) - row) \
-              for col in range(len(self.board[0])) \
-              for row in range(len(self.board)) \
-      ])
-
-    # Required
-    def find_solution_a_star(self):
-        pq = queue.PriorityQueue()
-        pq.put((self.heuristic_md(), 0, [], self))
-        trace = set()
-        while True:
-            node = pq.get()
-            if tuple(tuple(x) for x in node[3].board) in trace:
-                continue
-            else:
-                trace.add(tuple(tuple(x) for x in node[3].board))
-            if node[3].is_solved(): 
-                return node[2]
-            for (move, new_p) in node[3].successors():
-                if tuple(tuple(x) for x in new_p.board) not in trace:
-                    pq.put((node[1] + 1 + new_p.heuristic_md(), node[1] + 1, node[2] + [move], new_p))
-"""
 ############################################################
 # Section 2: Grid Navigation
 ############################################################
@@ -444,20 +343,19 @@ class solve_disks(object):
     def find_solution_a_star(self):
         pq = queue.PriorityQueue()
         pq.put((self.heuristic(), 0, [], self))  # add the initial state to queue
-        trace = set()               # keep trace of pos history
+        # g value
+        trace = {tuple(self.grid): 0}               # keep trace of pos history
         while True:
             if pq.empty():          # no optimal solution
                 return None
             node = pq.get()         # expand according to priority
-            if tuple(node[3].grid) in trace:    # discard the node if having been expanded
-                continue
-            else:
-                trace.add(tuple(node[3].grid))  # add node to trace only when expanded
             if node[3].is_solved(): # optimal solution found
                 return node[2]
             for (move, new_p) in node[3].successors():
-                if tuple(new_p.grid) not in trace:
-                    pq.put((node[1] + 1 + new_p.heuristic(), node[1] + 1, node[2] + [move], new_p))
+                new_g = node[1] + 1
+                if tuple(new_p.grid) not in trace or new_g < trace(tuple(new_p.grid)):
+                    trace[tuple(new_p.grid)] = new_g
+                    pq.put((node[1] + 1 + new_p.heuristic(), new_g , node[2] + [move], new_p))
 
 def solve_distinct_disks(length, n):
     p = solve_disks(length, n, 0)
