@@ -149,7 +149,7 @@ class TilePuzzle(object):
             if curr[3].is_solved():
                 return curr[2]
 
-            for move, puzzle in curr.successors():
+            for move, puzzle in curr[3].successors():
                 new_g = curr[1] + 1
                 new_h = puzzle.manhattan(puzzle.sol)
                 if tuple(tuple(x) for x in puzzle.board) not in closed_set or new_g < closed_set[tuple(tuple(x) for x in puzzle.board)]:
